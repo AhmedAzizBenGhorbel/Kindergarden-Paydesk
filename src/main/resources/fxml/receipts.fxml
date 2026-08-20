@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/25"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="almohtadinepaydesk.controllers.ReceiptController"
+            styleClass="receipts-page">
+    <top>
+        <VBox spacing="12">
+            <Label text="Donn&#233;es des re&#231;us" styleClass="page-title" />
+
+            <VBox spacing="10" styleClass="filters-card">
+                <padding>
+                    <Insets top="12" right="14" bottom="12" left="14" />
+                </padding>
+
+                <HBox spacing="10">
+                    <TextField fx:id="searchField"
+                               prefWidth="240"
+                               promptText="Rechercher par re&#231;u ou enfant"
+                               styleClass="text-input-field" />
+
+                    <ComboBox fx:id="schoolYearComboBox"
+                              prefWidth="170"
+                              promptText="Ann&#233;e scolaire"
+                              styleClass="combo-field" />
+
+                    <ComboBox fx:id="monthComboBox"
+                              prefWidth="150"
+                              promptText="Mois"
+                              styleClass="combo-field" />
+
+                    <ComboBox fx:id="paymentMethodComboBox"
+                              prefWidth="150"
+                              promptText="Mode paiement"
+                              styleClass="combo-field" />
+
+                    <Button text="Actualiser"
+                            onAction="#handleRefresh"
+                            styleClass="secondary-action-button" />
+                </HBox>
+            </VBox>
+        </VBox>
+    </top>
+
+    <center>
+        <TableView fx:id="receiptsTable" styleClass="receipts-table">
+            <BorderPane.margin>
+                <Insets top="18" right="0" bottom="0" left="0" />
+            </BorderPane.margin>
+            <columns>
+                <TableColumn fx:id="receiptNumberColumn" text="Num&#233;ro re&#231;u" prefWidth="130" />
+                <TableColumn fx:id="childColumn" text="Enfant" prefWidth="150" />
+                <TableColumn fx:id="parentColumn" text="Parent / tuteur" prefWidth="150" />
+                <TableColumn fx:id="amountColumn" text="Montant pay&#233;" prefWidth="120" />
+                <TableColumn fx:id="paymentDateColumn" text="Date paiement" prefWidth="120" />
+                <TableColumn fx:id="paymentMethodColumn" text="Mode paiement" prefWidth="120" />
+                <TableColumn fx:id="schoolYearColumn" text="Ann&#233;e scolaire" prefWidth="120" />
+                <TableColumn fx:id="monthColumn" text="Mois" prefWidth="110" />
+                <TableColumn fx:id="createdByColumn" text="Cr&#233;&#233; par" prefWidth="130" />
+                <TableColumn fx:id="noteColumn" text="Note" prefWidth="190" />
+            </columns>
+        </TableView>
+    </center>
+</BorderPane>

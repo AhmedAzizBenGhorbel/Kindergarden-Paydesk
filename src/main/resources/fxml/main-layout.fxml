@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/25"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="almohtadinepaydesk.controllers.MainLayoutController"
+            styleClass="app-layout">
+    <left>
+        <VBox prefWidth="250" spacing="16" styleClass="sidebar">
+            <padding>
+                <Insets top="24" right="16" bottom="18" left="16" />
+            </padding>
+
+            <VBox spacing="4">
+                <Label text="Kindergarden Paydesk" styleClass="sidebar-title" />
+                <Label text="Garderie Almohtadine" styleClass="sidebar-subtitle" />
+            </VBox>
+
+            <VBox spacing="4" styleClass="connected-user-box">
+                <Label fx:id="connectedUserLabel" text="Utilisateur" styleClass="connected-name" />
+                <Label fx:id="connectedRoleLabel" text="R&#244;le :" styleClass="connected-role" />
+            </VBox>
+
+            <ScrollPane fitToWidth="true"
+                        hbarPolicy="NEVER"
+                        vbarPolicy="AS_NEEDED"
+                        VBox.vgrow="ALWAYS"
+                        styleClass="sidebar-scroll">
+                <content>
+                    <VBox spacing="6">
+                        <Button text="Tableau de bord" maxWidth="Infinity" onAction="#showDashboard" styleClass="sidebar-button" />
+                        <Button text="Enfants" maxWidth="Infinity" onAction="#showChildren" styleClass="sidebar-button" />
+                        <Button text="Ann&#233;es scolaires" maxWidth="Infinity" onAction="#showSchoolYears" styleClass="sidebar-button" />
+                        <Button text="Paiements" maxWidth="Infinity" onAction="#showPayments" styleClass="sidebar-button" />
+                        <Button text="Frais suppl&#233;mentaires" maxWidth="Infinity" onAction="#showExtras" styleClass="sidebar-button" />
+                        <Button text="Donn&#233;es des re&#231;us" maxWidth="Infinity" onAction="#showReceipts" styleClass="sidebar-button" />
+                        <Button text="Sauvegardes" maxWidth="Infinity" onAction="#showBackups" styleClass="sidebar-button" />
+                        <Button text="Param&#232;tres" maxWidth="Infinity" onAction="#showSettings" styleClass="sidebar-button" />
+                        <Button fx:id="usersButton" text="Gestion des comptes" maxWidth="Infinity" onAction="#showUsers" styleClass="sidebar-button" />
+                        <Button fx:id="activityLogsButton" text="Journaux d'activit&#233;" maxWidth="Infinity" onAction="#showActivityLogs" styleClass="sidebar-button" />
+                        <Button text="Changer mot de passe" maxWidth="Infinity" onAction="#showChangePassword" styleClass="sidebar-button" />
+                        <Button text="&#192; propos" maxWidth="Infinity" onAction="#showAbout" styleClass="sidebar-button" />
+                    </VBox>
+                </content>
+            </ScrollPane>
+
+            <Region prefHeight="4" />
+
+            <Button text="Se d&#233;connecter"
+                    maxWidth="Infinity"
+                    onAction="#handleLogout"
+                    styleClass="sidebar-logout-button" />
+        </VBox>
+    </left>
+
+    <center>
+        <StackPane fx:id="contentArea" styleClass="content-area">
+            <padding>
+                <Insets top="26" right="28" bottom="26" left="28" />
+            </padding>
+        </StackPane>
+    </center>
+</BorderPane>

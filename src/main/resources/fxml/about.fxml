@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx/25" styleClass="placeholder-page">
+    <VBox alignment="CENTER_LEFT" spacing="12" styleClass="about-card">
+        <padding>
+            <Insets top="30" right="34" bottom="30" left="34" />
+        </padding>
+
+        <Label text="Kindergarden Paydesk" styleClass="about-title" />
+        <Label text="Garderie Almohtadine" styleClass="about-organization" />
+        <Label text="Application de suivi des paiements" styleClass="about-text" />
+        <Label text="Version 1.0" styleClass="about-text" />
+        <Label text="Projet d&#8217;int&#233;gration universitaire" styleClass="about-text" />
+    </VBox>
+</StackPane>

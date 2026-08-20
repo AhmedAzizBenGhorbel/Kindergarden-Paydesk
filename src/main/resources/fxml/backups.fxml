@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/25"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="almohtadinepaydesk.controllers.BackupController"
+            styleClass="backups-page">
+    <top>
+        <VBox spacing="12">
+            <Label text="Sauvegardes" styleClass="page-title" />
+
+            <VBox spacing="10" styleClass="filters-card">
+                <padding>
+                    <Insets top="12" right="14" bottom="12" left="14" />
+                </padding>
+
+                <Label text="Dossier de sauvegarde" styleClass="field-label" />
+
+                <HBox spacing="10">
+                    <TextField fx:id="backupFolderField"
+                               promptText="Dossier de sauvegarde"
+                               editable="false"
+                               HBox.hgrow="ALWAYS"
+                               styleClass="text-input-field" />
+
+                    <Button text="Choisir un dossier"
+                            onAction="#handleChooseBackupFolder"
+                            styleClass="secondary-action-button" />
+
+                    <Button text="Lancer une sauvegarde"
+                            onAction="#handleRunBackup"
+                            styleClass="primary-action-button" />
+                </HBox>
+            </VBox>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="8">
+            <BorderPane.margin>
+                <Insets top="18" right="0" bottom="0" left="0" />
+            </BorderPane.margin>
+
+            <Label text="Historique des sauvegardes" styleClass="form-title" />
+
+            <TableView fx:id="backupHistoryTable" styleClass="backups-table" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="dateColumn" text="Date" prefWidth="140" />
+                    <TableColumn fx:id="fileNameColumn" text="Nom du fichier" prefWidth="250" />
+                    <TableColumn fx:id="folderColumn" text="Dossier" prefWidth="220" />
+                    <TableColumn fx:id="statusColumn" text="Statut" prefWidth="90" />
+                    <TableColumn fx:id="messageColumn" text="Message" prefWidth="320" />
+                </columns>
+            </TableView>
+        </VBox>
+    </center>
+</BorderPane>

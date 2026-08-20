@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/25"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="almohtadinepaydesk.controllers.ExtraController"
+            styleClass="extras-page">
+    <top>
+        <VBox spacing="6">
+            <Label text="Frais suppl&#233;mentaires" styleClass="page-title" />
+            <Label text="G&#233;rer les frais ponctuels et r&#233;currents." styleClass="page-subtitle" />
+        </VBox>
+    </top>
+
+    <center>
+        <HBox spacing="18">
+            <padding>
+                <Insets top="18" right="0" bottom="0" left="0" />
+            </padding>
+
+            <TableView fx:id="extrasTable" HBox.hgrow="ALWAYS" styleClass="extras-table">
+                <columns>
+                    <TableColumn fx:id="childColumn" text="Enfant" prefWidth="150" />
+                    <TableColumn fx:id="labelColumn" text="Libell&#233;" prefWidth="130" />
+                    <TableColumn fx:id="amountColumn" text="Montant" prefWidth="100" />
+                    <TableColumn fx:id="typeColumn" text="Type" prefWidth="95" />
+                    <TableColumn fx:id="schoolYearColumn" text="Ann&#233;e scolaire" prefWidth="120" />
+                    <TableColumn fx:id="startMonthColumn" text="Mois d&#233;but" prefWidth="105" />
+                    <TableColumn fx:id="endMonthColumn" text="Mois fin" prefWidth="95" />
+                    <TableColumn fx:id="stateColumn" text="&#201;tat" prefWidth="80" />
+                    <TableColumn fx:id="noteColumn" text="Note" prefWidth="170" />
+                </columns>
+            </TableView>
+
+            <ScrollPane fitToWidth="true"
+                        prefWidth="350"
+                        hbarPolicy="NEVER"
+                        vbarPolicy="AS_NEEDED"
+                        styleClass="form-scroll">
+                <content>
+                    <VBox spacing="9" styleClass="form-card">
+                        <padding>
+                            <Insets top="18" right="20" bottom="18" left="20" />
+                        </padding>
+
+                        <Label text="Fiche frais" styleClass="form-title" />
+
+                        <Label text="Enfant" styleClass="field-label" />
+                        <ComboBox fx:id="childComboBox"
+                                  maxWidth="Infinity"
+                                  promptText="Enfant"
+                                  styleClass="combo-field" />
+
+                        <Label text="Libell&#233;" styleClass="field-label" />
+                        <ComboBox fx:id="labelComboBox"
+                                  maxWidth="Infinity"
+                                  promptText="Exemple: Transport"
+                                  styleClass="combo-field" />
+
+                        <Label text="Montant" styleClass="field-label" />
+                        <TextField fx:id="amountField"
+                                   promptText="Exemple: 50.000"
+                                   styleClass="text-input-field" />
+
+                        <Label text="Type" styleClass="field-label" />
+                        <ComboBox fx:id="typeComboBox"
+                                  maxWidth="Infinity"
+                                  promptText="Type"
+                                  styleClass="combo-field" />
+
+                        <Label text="Ann&#233;e scolaire" styleClass="field-label" />
+                        <ComboBox fx:id="schoolYearComboBox"
+                                  maxWidth="Infinity"
+                                  promptText="Ann&#233;e scolaire"
+                                  styleClass="combo-field" />
+
+                        <Label text="Mois d&#233;but" styleClass="field-label" />
+                        <ComboBox fx:id="startMonthComboBox"
+                                  maxWidth="Infinity"
+                                  promptText="Mois d&#233;but"
+                                  styleClass="combo-field" />
+
+                        <Label text="Mois fin" styleClass="field-label" />
+                        <ComboBox fx:id="endMonthComboBox"
+                                  maxWidth="Infinity"
+                                  promptText="Mois fin"
+                                  styleClass="combo-field" />
+
+                        <Label text="Note" styleClass="field-label" />
+                        <TextArea fx:id="noteArea"
+                                  promptText="Note"
+                                  prefRowCount="3"
+                                  wrapText="true"
+                                  styleClass="text-area-field" />
+
+                        <VBox spacing="8">
+                            <Button text="Ajouter"
+                                    maxWidth="Infinity"
+                                    onAction="#handleAddExtra"
+                                    styleClass="primary-action-button" />
+
+                            <HBox spacing="8">
+                                <Button fx:id="updateButton"
+                                        text="Modifier"
+                                        maxWidth="Infinity"
+                                        onAction="#handleUpdateExtra"
+                                        HBox.hgrow="ALWAYS"
+                                        styleClass="secondary-action-button" />
+                                <Button text="R&#233;initialiser"
+                                        maxWidth="Infinity"
+                                        onAction="#resetForm"
+                                        HBox.hgrow="ALWAYS"
+                                        styleClass="secondary-action-button" />
+                            </HBox>
+
+                            <HBox spacing="8">
+                                <Button fx:id="deactivateButton"
+                                        text="D&#233;sactiver"
+                                        maxWidth="Infinity"
+                                        onAction="#handleDeactivateExtra"
+                                        HBox.hgrow="ALWAYS"
+                                        styleClass="danger-action-button" />
+                                <Button fx:id="reactivateButton"
+                                        text="R&#233;activer"
+                                        maxWidth="Infinity"
+                                        onAction="#handleReactivateExtra"
+                                        HBox.hgrow="ALWAYS"
+                                        styleClass="secondary-action-button" />
+                            </HBox>
+                        </VBox>
+                    </VBox>
+                </content>
+            </ScrollPane>
+        </HBox>
+    </center>
+</BorderPane>

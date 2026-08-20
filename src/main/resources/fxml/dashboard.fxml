@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.TilePane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/25"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="almohtadinepaydesk.controllers.DashboardController"
+            styleClass="dashboard-page">
+    <top>
+        <VBox spacing="12">
+            <Label text="Tableau de bord" styleClass="page-title" />
+
+            <HBox spacing="10" styleClass="filters-card">
+                <padding>
+                    <Insets top="12" right="14" bottom="12" left="14" />
+                </padding>
+
+                <ComboBox fx:id="schoolYearComboBox"
+                          prefWidth="170"
+                          promptText="Ann&#233;e scolaire"
+                          styleClass="combo-field" />
+
+                <ComboBox fx:id="monthComboBox"
+                          prefWidth="160"
+                          promptText="Mois"
+                          styleClass="combo-field" />
+
+                <ComboBox fx:id="classGroupComboBox"
+                          prefWidth="180"
+                          promptText="Classe / groupe"
+                          styleClass="combo-field" />
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true"
+                    hbarPolicy="NEVER"
+                    vbarPolicy="AS_NEEDED"
+                    styleClass="dashboard-scroll">
+            <content>
+                <VBox spacing="18">
+                    <padding>
+                        <Insets top="18" right="2" bottom="18" left="0" />
+                    </padding>
+
+                    <TilePane hgap="12" vgap="12" prefColumns="4">
+                        <VBox spacing="8" prefWidth="188" minHeight="96" styleClass="dashboard-card">
+                            <Label text="Nombre d&#8217;enfants actifs" styleClass="dashboard-card-title" />
+                            <Label fx:id="activeChildrenLabel" text="0" styleClass="dashboard-count-value" />
+                        </VBox>
+
+                        <VBox spacing="8" prefWidth="188" minHeight="96" styleClass="dashboard-card">
+                            <Label text="Total attendu ce mois" styleClass="dashboard-card-title" />
+                            <Label fx:id="totalExpectedLabel" text="0 TND" styleClass="dashboard-money-value" />
+                        </VBox>
+
+                        <VBox spacing="8" prefWidth="188" minHeight="96" styleClass="dashboard-card">
+                            <Label text="Total pay&#233; ce mois" styleClass="dashboard-card-title" />
+                            <Label fx:id="totalPaidLabel" text="0 TND" styleClass="dashboard-paid-value" />
+                        </VBox>
+
+                        <VBox spacing="8" prefWidth="188" minHeight="96" styleClass="dashboard-card">
+                            <Label text="Total restant ce mois" styleClass="dashboard-card-title" />
+                            <Label fx:id="totalRemainingLabel" text="0 TND" styleClass="dashboard-warning-value" />
+                        </VBox>
+
+                        <VBox spacing="8" prefWidth="188" minHeight="96" styleClass="dashboard-card">
+                            <Label text="Paiements non pay&#233;s" styleClass="dashboard-card-title" />
+                            <Label fx:id="unpaidCountLabel" text="0" styleClass="dashboard-warning-value" />
+                        </VBox>
+
+                        <VBox spacing="8" prefWidth="188" minHeight="96" styleClass="dashboard-card">
+                            <Label text="Paiements partiels" styleClass="dashboard-card-title" />
+                            <Label fx:id="partialCountLabel" text="0" styleClass="dashboard-warning-value" />
+                        </VBox>
+
+                        <VBox spacing="8" prefWidth="188" minHeight="96" styleClass="dashboard-card">
+                            <Label text="Paiements en retard" styleClass="dashboard-card-title" />
+                            <Label fx:id="lateCountLabel" text="0" styleClass="dashboard-danger-value" />
+                        </VBox>
+                    </TilePane>
+
+                    <VBox spacing="8">
+                        <Label text="Derniers paiements enregistr&#233;s" styleClass="dashboard-section-title" />
+
+                        <TableView fx:id="recentPaymentsTable" prefHeight="220" styleClass="dashboard-table">
+                            <columns>
+                                <TableColumn fx:id="paymentDateColumn" text="Date" prefWidth="105" />
+                                <TableColumn fx:id="paymentChildColumn" text="Enfant" prefWidth="170" />
+                                <TableColumn fx:id="paymentMonthColumn" text="Mois" prefWidth="170" />
+                                <TableColumn fx:id="paymentAmountColumn" text="Montant" prefWidth="120" />
+                                <TableColumn fx:id="paymentMethodColumn" text="Mode" prefWidth="110" />
+                                <TableColumn fx:id="paymentReceiptColumn" text="Re&#231;u" prefWidth="140" />
+                            </columns>
+                        </TableView>
+                    </VBox>
+
+                    <VBox spacing="8">
+                        <Label text="Recherche rapide enfant" styleClass="dashboard-section-title" />
+
+                        <TextField fx:id="childSearchField"
+                                   prefWidth="280"
+                                   maxWidth="320"
+                                   promptText="Rechercher un enfant"
+                                   styleClass="text-input-field" />
+
+                        <TableView fx:id="childSearchTable" prefHeight="220" styleClass="dashboard-table">
+                            <columns>
+                                <TableColumn fx:id="childNameColumn" text="Nom complet" prefWidth="190" />
+                                <TableColumn fx:id="childClassColumn" text="Classe / groupe" prefWidth="140" />
+                                <TableColumn fx:id="childParentColumn" text="Parent / tuteur" prefWidth="170" />
+                                <TableColumn fx:id="childPhoneColumn" text="T&#233;l&#233;phone parent" prefWidth="145" />
+                                <TableColumn fx:id="childFeeColumn" text="Frais mensuels" prefWidth="130" />
+                            </columns>
+                        </TableView>
+                    </VBox>
+                </VBox>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/25"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="almohtadinepaydesk.controllers.PaymentController"
+            styleClass="payments-page">
+    <top>
+        <VBox spacing="12">
+            <Label text="Paiements" styleClass="page-title" />
+
+            <VBox spacing="10" styleClass="filters-card">
+                <padding>
+                    <Insets top="12" right="14" bottom="12" left="14" />
+                </padding>
+
+                <HBox spacing="10">
+                    <ComboBox fx:id="schoolYearComboBox"
+                              prefWidth="170"
+                              promptText="Ann&#233;e scolaire"
+                              styleClass="combo-field" />
+
+                    <ComboBox fx:id="monthComboBox"
+                              prefWidth="160"
+                              promptText="Mois"
+                              styleClass="combo-field" />
+
+                    <ComboBox fx:id="classGroupComboBox"
+                              prefWidth="170"
+                              promptText="Classe / groupe"
+                              styleClass="combo-field" />
+
+                    <ComboBox fx:id="statusComboBox"
+                              prefWidth="150"
+                              promptText="Statut"
+                              styleClass="combo-field" />
+                </HBox>
+
+                <HBox spacing="10">
+                    <Button text="G&#233;n&#233;rer les paiements mensuels"
+                            onAction="#handleGenerateMonthlyRecords"
+                            styleClass="primary-action-button" />
+
+                    <Button text="Recalculer les statuts"
+                            onAction="#handleRecalculateStatuses"
+                            styleClass="secondary-action-button" />
+                </HBox>
+            </VBox>
+        </VBox>
+    </top>
+
+    <center>
+        <TableView fx:id="paymentsTable" styleClass="payments-table">
+            <BorderPane.margin>
+                <Insets top="18" right="0" bottom="0" left="0" />
+            </BorderPane.margin>
+            <columns>
+                <TableColumn fx:id="childColumn" text="Enfant" prefWidth="160" />
+                <TableColumn fx:id="classColumn" text="Classe" prefWidth="100" />
+                <TableColumn fx:id="schoolYearColumn" text="Ann&#233;e" prefWidth="100" />
+                <TableColumn fx:id="monthColumn" text="Mois" prefWidth="110" />
+                <TableColumn fx:id="expectedColumn" text="Attendu" prefWidth="105" />
+                <TableColumn fx:id="paidColumn" text="Pay&#233;" prefWidth="105" />
+                <TableColumn fx:id="remainingColumn" text="Restant" prefWidth="105" />
+                <TableColumn fx:id="advanceColumn" text="Avance" prefWidth="135" />
+                <TableColumn fx:id="statusColumn" text="Statut" prefWidth="95" />
+                <TableColumn fx:id="actionsColumn" text="Actions" prefWidth="120" />
+            </columns>
+        </TableView>
+    </center>
+</BorderPane>

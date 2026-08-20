@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/25"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="almohtadinepaydesk.controllers.UserManagementController"
+      spacing="18"
+      styleClass="user-management-page">
+
+    <BorderPane fx:id="managementPane">
+        <top>
+            <VBox spacing="6">
+                <Label text="Gestion des comptes" styleClass="page-title" />
+                <Label text="Ajouter et modifier les comptes Personnel." styleClass="page-subtitle" />
+            </VBox>
+        </top>
+
+        <center>
+            <HBox spacing="18">
+                <padding>
+                    <Insets top="18" right="0" bottom="0" left="0" />
+                </padding>
+
+                <TableView fx:id="usersTable" HBox.hgrow="ALWAYS" styleClass="users-table">
+                    <columns>
+                        <TableColumn fx:id="idColumn" text="ID" prefWidth="55" />
+                        <TableColumn fx:id="fullNameColumn" text="Nom complet" prefWidth="170" />
+                        <TableColumn fx:id="usernameColumn" text="Nom d&#8217;utilisateur" prefWidth="150" />
+                        <TableColumn fx:id="roleColumn" text="R&#244;le" prefWidth="120" />
+                        <TableColumn fx:id="stateColumn" text="&#201;tat" prefWidth="120" />
+                    </columns>
+                </TableView>
+
+                <VBox spacing="14" prefWidth="330" styleClass="form-card">
+                    <padding>
+                        <Insets top="20" right="20" bottom="20" left="20" />
+                    </padding>
+
+                    <Label fx:id="formTitleLabel" text="Ajouter un compte personnel" styleClass="form-title" />
+
+                    <GridPane hgap="10" vgap="10">
+                        <Label text="Nom complet" GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="field-label" />
+                        <TextField fx:id="fullNameField"
+                                   promptText="Nom complet"
+                                   GridPane.rowIndex="1"
+                                   GridPane.columnIndex="0"
+                                   GridPane.hgrow="ALWAYS"
+                                   styleClass="text-input-field" />
+
+                        <Label text="Nom d&#8217;utilisateur" GridPane.rowIndex="2" GridPane.columnIndex="0" styleClass="field-label" />
+                        <TextField fx:id="usernameField"
+                                   promptText="Nom d&#8217;utilisateur"
+                                   GridPane.rowIndex="3"
+                                   GridPane.columnIndex="0"
+                                   GridPane.hgrow="ALWAYS"
+                                   styleClass="text-input-field" />
+
+                        <Label text="Mot de passe" GridPane.rowIndex="4" GridPane.columnIndex="0" styleClass="field-label" />
+                        <PasswordField fx:id="passwordField"
+                                       promptText="Mot de passe"
+                                       GridPane.rowIndex="5"
+                                       GridPane.columnIndex="0"
+                                       GridPane.hgrow="ALWAYS"
+                                       styleClass="text-input-field" />
+
+                        <Label text="Confirmer le mot de passe" GridPane.rowIndex="6" GridPane.columnIndex="0" styleClass="field-label" />
+                        <PasswordField fx:id="confirmPasswordField"
+                                       promptText="Confirmer le mot de passe"
+                                       GridPane.rowIndex="7"
+                                       GridPane.columnIndex="0"
+                                       GridPane.hgrow="ALWAYS"
+                                       styleClass="text-input-field" />
+
+                        <CheckBox fx:id="activeCheckBox"
+                                  text="Compte actif"
+                                  selected="true"
+                                  GridPane.rowIndex="8"
+                                  GridPane.columnIndex="0"
+                                  styleClass="active-check-box" />
+                    </GridPane>
+
+                    <VBox spacing="8">
+                        <Button text="Ajouter un compte personnel"
+                                maxWidth="Infinity"
+                                onAction="#handleAddUser"
+                                styleClass="primary-action-button" />
+
+                        <HBox spacing="8">
+                            <Button fx:id="updateButton"
+                                    text="Modifier"
+                                    maxWidth="Infinity"
+                                    onAction="#handleUpdateUser"
+                                    HBox.hgrow="ALWAYS"
+                                    styleClass="secondary-action-button" />
+                            <Button text="Effacer"
+                                    maxWidth="Infinity"
+                                    onAction="#clearForm"
+                                    HBox.hgrow="ALWAYS"
+                                    styleClass="secondary-action-button" />
+                        </HBox>
+
+                        <HBox spacing="8">
+                            <Button fx:id="deactivateButton"
+                                    text="D&#233;sactiver"
+                                    maxWidth="Infinity"
+                                    onAction="#handleDeactivateUser"
+                                    HBox.hgrow="ALWAYS"
+                                    styleClass="danger-action-button" />
+                            <Button fx:id="reactivateButton"
+                                    text="R&#233;activer"
+                                    maxWidth="Infinity"
+                                    onAction="#handleReactivateUser"
+                                    HBox.hgrow="ALWAYS"
+                                    styleClass="secondary-action-button" />
+                        </HBox>
+                    </VBox>
+                </VBox>
+            </HBox>
+        </center>
+    </BorderPane>
+
+    <VBox fx:id="accessDeniedPane"
+          visible="false"
+          managed="false"
+          spacing="10"
+          styleClass="form-card">
+        <padding>
+            <Insets top="24" right="28" bottom="24" left="28" />
+        </padding>
+        <Label text="Gestion des comptes" styleClass="page-title" />
+        <Label text="Acc&#232;s r&#233;serv&#233; aux administrateurs." styleClass="placeholder-text" />
+    </VBox>
+</VBox>

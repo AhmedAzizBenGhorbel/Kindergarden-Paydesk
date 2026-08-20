@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/25"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="almohtadinepaydesk.controllers.ChildController"
+            styleClass="children-page">
+    <top>
+        <VBox spacing="12">
+            <Label text="Enfants" styleClass="page-title" />
+
+            <HBox spacing="10" styleClass="filters-card">
+                <padding>
+                    <Insets top="12" right="14" bottom="12" left="14" />
+                </padding>
+
+                <TextField fx:id="searchField"
+                           promptText="Rechercher par nom"
+                           prefWidth="230"
+                           styleClass="text-input-field" />
+
+                <ComboBox fx:id="classFilterComboBox"
+                          prefWidth="190"
+                          promptText="Classe / groupe"
+                          styleClass="combo-field" />
+
+                <ComboBox fx:id="statusFilterComboBox"
+                          prefWidth="140"
+                          promptText="Statut"
+                          styleClass="combo-field" />
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <HBox spacing="18">
+            <padding>
+                <Insets top="18" right="0" bottom="0" left="0" />
+            </padding>
+
+            <TableView fx:id="childrenTable" HBox.hgrow="ALWAYS" styleClass="children-table">
+                <columns>
+                    <TableColumn fx:id="idColumn" text="ID" prefWidth="55" />
+                    <TableColumn fx:id="fullNameColumn" text="Nom complet" prefWidth="170" />
+                    <TableColumn fx:id="classGroupColumn" text="Classe / groupe" prefWidth="130" />
+                    <TableColumn fx:id="parentNameColumn" text="Parent / tuteur" prefWidth="150" />
+                    <TableColumn fx:id="parentPhoneColumn" text="T&#233;l&#233;phone parent" prefWidth="140" />
+                    <TableColumn fx:id="registrationDateColumn" text="Date d&#8217;inscription" prefWidth="130" />
+                    <TableColumn fx:id="monthlyFeeColumn" text="Frais mensuels" prefWidth="125" />
+                    <TableColumn fx:id="statusColumn" text="Statut" prefWidth="90" />
+                    <TableColumn fx:id="noteColumn" text="Note" prefWidth="180" />
+                </columns>
+            </TableView>
+
+            <ScrollPane fitToWidth="true"
+                        prefWidth="350"
+                        hbarPolicy="NEVER"
+                        vbarPolicy="AS_NEEDED"
+                        styleClass="form-scroll">
+                <content>
+                    <VBox spacing="9" styleClass="form-card">
+                        <padding>
+                            <Insets top="18" right="20" bottom="18" left="20" />
+                        </padding>
+
+                        <Label text="Fiche enfant" styleClass="form-title" />
+
+                        <Label text="Nom complet" styleClass="field-label" />
+                        <TextField fx:id="fullNameField"
+                                   promptText="Nom complet"
+                                   styleClass="text-input-field" />
+
+                        <Label text="Classe / groupe" styleClass="field-label" />
+                        <TextField fx:id="classGroupField"
+                                   promptText="Classe / groupe"
+                                   styleClass="text-input-field" />
+
+                        <Label text="Nom du parent / tuteur" styleClass="field-label" />
+                        <TextField fx:id="parentNameField"
+                                   promptText="Nom du parent / tuteur"
+                                   styleClass="text-input-field" />
+
+                        <Label text="T&#233;l&#233;phone parent" styleClass="field-label" />
+                        <TextField fx:id="parentPhoneField"
+                                   promptText="T&#233;l&#233;phone parent"
+                                   styleClass="text-input-field" />
+
+                        <Label text="Date d&#8217;inscription" styleClass="field-label" />
+                        <DatePicker fx:id="registrationDatePicker"
+                                    maxWidth="Infinity"
+                                    promptText="Date d&#8217;inscription"
+                                    styleClass="date-field" />
+
+                        <Label text="Frais mensuels personnalis&#233;s" styleClass="field-label" />
+                        <TextField fx:id="monthlyFeeField"
+                                   promptText="Exemple: 250.000"
+                                   styleClass="text-input-field" />
+
+                        <Label text="Note" styleClass="field-label" />
+                        <TextArea fx:id="noteArea"
+                                  promptText="Note"
+                                  prefRowCount="3"
+                                  wrapText="true"
+                                  styleClass="text-area-field" />
+
+                        <VBox spacing="8">
+                            <Button text="Ajouter"
+                                    maxWidth="Infinity"
+                                    onAction="#handleAddChild"
+                                    styleClass="primary-action-button" />
+
+                            <HBox spacing="8">
+                                <Button fx:id="updateButton"
+                                        text="Modifier"
+                                        maxWidth="Infinity"
+                                        onAction="#handleUpdateChild"
+                                        HBox.hgrow="ALWAYS"
+                                        styleClass="secondary-action-button" />
+                                <Button text="R&#233;initialiser"
+                                        maxWidth="Infinity"
+                                        onAction="#resetForm"
+                                        HBox.hgrow="ALWAYS"
+                                        styleClass="secondary-action-button" />
+                            </HBox>
+
+                            <HBox spacing="8">
+                                <Button fx:id="deactivateButton"
+                                        text="D&#233;sactiver"
+                                        maxWidth="Infinity"
+                                        onAction="#handleDeactivateChild"
+                                        HBox.hgrow="ALWAYS"
+                                        styleClass="danger-action-button" />
+                                <Button fx:id="reactivateButton"
+                                        text="R&#233;activer"
+                                        maxWidth="Infinity"
+                                        onAction="#handleReactivateChild"
+                                        HBox.hgrow="ALWAYS"
+                                        styleClass="secondary-action-button" />
+                            </HBox>
+                        </VBox>
+                    </VBox>
+                </content>
+            </ScrollPane>
+        </HBox>
+    </center>
+</BorderPane>
