@@ -1,15 +1,11 @@
 package almohtadinepaydesk.controllers;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.time.LocalDate;
 
 import almohtadinepaydesk.dao.ActivityLogDao;
 import almohtadinepaydesk.dao.MonthlyRecordDao;
 import almohtadinepaydesk.dao.PaymentEntryDao;
-import almohtadinepaydesk.dao.ReceiptDao;
-import almohtadinepaydesk.database.DatabaseConnection;
 import almohtadinepaydesk.models.MonthlyRecord;
 import almohtadinepaydesk.models.PaymentEntry;
 import almohtadinepaydesk.models.PaymentMethod;
@@ -18,6 +14,7 @@ import almohtadinepaydesk.models.User;
 import almohtadinepaydesk.security.Session;
 import almohtadinepaydesk.services.PaymentCalculationService;
 import almohtadinepaydesk.services.ReceiptNumberService;
+import almohtadinepaydesk.services.PaymentTransactionService;
 import almohtadinepaydesk.utils.AlertUtil;
 import almohtadinepaydesk.utils.CurrencyUtil;
 import almohtadinepaydesk.utils.DateUtil;
@@ -38,7 +35,7 @@ public class PaymentDetailController {
 
     private final MonthlyRecordDao monthlyRecordDao = new MonthlyRecordDao();
     private final PaymentEntryDao paymentEntryDao = new PaymentEntryDao();
-    private final ReceiptDao receiptDao = new ReceiptDao();
+    private final PaymentTransactionService transactionService = new PaymentTransactionService();
     private final ActivityLogDao activityLogDao = new ActivityLogDao();
     private final PaymentCalculationService calculationService = new PaymentCalculationService();
     private final ReceiptNumberService receiptNumberService = new ReceiptNumberService();
@@ -237,37 +234,9 @@ public class PaymentDetailController {
     }
 
     private boolean savePaymentAndReceipt(PaymentEntry paymentEntry, Receipt receipt) {
-        try (Connection connection = DatabaseConnection.getConnection()) {
-            connection.setAutoCommit(false);
-
-            if (!paymentEntryDao.createPaymentEntry(connection, paymentEntry)) {
-                rollbackQuietly(connection);
-                AlertUtil.showError("Paiement", paymentEntryDao.getLastErrorMessage());
-                return false;
-            }
-
-            receipt.setPaymentEntryId(paymentEntry.getId());
-            if (!receiptDao.createReceipt(connection, receipt)) {
-                rollbackQuietly(connection);
-                AlertUtil.showError("Re\u00e7u", receiptDao.getLastErrorMessage());
-                return false;
-            }
-
-            connection.commit();
-            return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            AlertUtil.showError("Paiement", "Erreur base de donn\u00e9es: " + e.getMessage());
-            return false;
-        }
-    }
-
-    private void rollbackQuietly(Connection connection) {
-        try {
-            connection.rollback();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        if (transactionService.save(paymentEntry, receipt)) return true;
+        AlertUtil.showError("Paiement", transactionService.getLastErrorMessage());
+        return false;
     }
 
     private BigDecimal parseAmount() {
