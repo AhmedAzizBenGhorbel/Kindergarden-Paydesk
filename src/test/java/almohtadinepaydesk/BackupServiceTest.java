@@ -71,6 +71,38 @@ class BackupServiceTest {
     @Test void invalidPathIsReportedAsFailure() {
         assertFalse(new StubBackup(0,false,true).runBackup("bad\u0000path").isSuccess());
     }
+    @Test void defaultBackupReloadsConfigurationBetweenAttempts() throws Exception {
+        String javaCommand = Path.of(System.getProperty("java.home"), "bin", "java").toString();
+        ProcessBuilder builder = new ProcessBuilder(javaCommand, "-cp", System.getProperty("java.class.path"),
+                ConfigurationReloadProbe.class.getName()).directory(directory.toFile()).redirectErrorStream(true);
+        builder.environment().keySet().removeIf(key -> key.startsWith("PAYDESK_DB_"));
+        Process process = builder.start();
+        try {
+            assertTrue(process.waitFor(10, TimeUnit.SECONDS), "Configuration probe timed out");
+            String output = new String(process.getInputStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            assertEquals(0, process.exitValue(), output);
+        } finally {
+            if (process.isAlive()) process.destroyForcibly();
+        }
+    }
+    public static class ConfigurationReloadProbe {
+        public static void main(String[] args) throws Exception {
+            String[] expectedHost = {"first-lab-host"};
+            BackupService backup = new BackupService() {
+                @Override protected Process startProcess(ProcessBuilder builder) throws IOException {
+                    if (!builder.command().contains("--host=" + expectedHost[0])) {
+                        throw new AssertionError("Backup reused stale database configuration");
+                    }
+                    throw new IOException("Synthetic executable failure");
+                }
+            };
+            for (String host : new String[]{"first-lab-host", "second-lab-host"}) {
+                expectedHost[0] = host;
+                Files.writeString(Path.of("paydesk.properties"), "db.host=" + host + "\n");
+                if (backup.runBackup(".").isSuccess()) throw new AssertionError("Synthetic backup succeeded");
+            }
+        }
+    }
     @Test void missingExecutableIsReproducibleWithoutDatabase() throws Exception {
         var config=new DatabaseConfig.Settings("localhost","3306","synthetic_lab","synthetic","","no-such-paydesk-dump-command-4821");
         var result=new BackupService(config,1).runBackup(directory.toString());
