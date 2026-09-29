@@ -24,14 +24,15 @@ public class SchemaInitializer {
             upgradeDefaultAdminPassword(connection);
             return true;
         } catch (IOException | SQLException e) {
-            e.printStackTrace();
+            DatabaseDiagnostics.report("schema initialization", e);
             return false;
         }
     }
 
     private static void executeSqlFile(Connection connection, String resourcePath)
             throws IOException, SQLException {
-        String sql = readResourceFile(resourcePath);
+        String sql = readResourceFile(resourcePath).replace("almohtadine_paydesk_db",
+                "`" + DatabaseConfig.getSettings().database() + "`");
         String sqlWithoutComments = removeCommentLines(sql);
         String[] commands = sqlWithoutComments.split(";");
 
@@ -149,6 +150,11 @@ public class SchemaInitializer {
         }
 
         return result.toString();
+    }
+
+    public static void main(String[] args) {
+        if (!initializeDatabase()) System.exit(1);
+        System.out.println("Database schema initialized.");
     }
 
     private SchemaInitializer() {

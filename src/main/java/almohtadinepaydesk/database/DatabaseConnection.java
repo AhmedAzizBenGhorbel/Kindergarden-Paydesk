@@ -7,17 +7,13 @@ import java.sql.SQLException;
 public class DatabaseConnection {
 
     public static Connection getServerConnection() throws SQLException {
-        return DriverManager.getConnection(
-                DatabaseConfig.SERVER_URL,
-                DatabaseConfig.USER,
-                DatabaseConfig.PASSWORD);
+        var settings = DatabaseConfig.getSettings();
+        return DriverManager.getConnection(settings.jdbcUrl(false), settings.user(), settings.password());
     }
 
     public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(
-                DatabaseConfig.URL,
-                DatabaseConfig.USER,
-                DatabaseConfig.PASSWORD);
+        var settings = DatabaseConfig.getSettings();
+        return DriverManager.getConnection(settings.jdbcUrl(true), settings.user(), settings.password());
     }
 
     private DatabaseConnection() {
