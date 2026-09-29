@@ -13,7 +13,7 @@ import almohtadinepaydesk.database.DatabaseConfig;
 
 public class BackupService {
 
-    private DatabaseConfig.Settings settings;
+    private final DatabaseConfig.Settings settings;
     private final long timeoutSeconds;
     public BackupService() { this(null, 120); }
     public BackupService(DatabaseConfig.Settings settings, long timeoutSeconds) {
@@ -40,7 +40,7 @@ public class BackupService {
         Process process = null;
         boolean success = false;
         try {
-            if (settings == null) settings = DatabaseConfig.getSettings();
+            DatabaseConfig.Settings settings = this.settings != null ? this.settings : DatabaseConfig.getSettings();
             output = java.nio.file.Files.createTempFile(folder, AppConfig.DEFAULT_BACKUP_FILE_PREFIX + "_"
                     + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss")) + "_", ".sql");
             options = java.nio.file.Files.createTempFile("paydesk-mysql-", ".cnf");
@@ -49,7 +49,7 @@ public class BackupService {
                     + "\npassword=" + quoteOption(settings.password()) + "\n";
             java.nio.file.Files.writeString(options, clientOptions, StandardCharsets.UTF_8);
             errors = java.nio.file.Files.createTempFile("paydesk-dump-", ".log");
-            List<String> command = buildCommand(output.toFile(), options);
+            List<String> command = buildCommand(output.toFile(), options, settings);
             ProcessBuilder builder = new ProcessBuilder(command);
             builder.redirectOutput(ProcessBuilder.Redirect.DISCARD);
             builder.redirectError(errors.toFile());
@@ -97,7 +97,7 @@ public class BackupService {
 
     protected Process startProcess(ProcessBuilder builder) throws IOException { return builder.start(); }
 
-    private List<String> buildCommand(File outputFile, java.nio.file.Path options) {
+    private List<String> buildCommand(File outputFile, java.nio.file.Path options, DatabaseConfig.Settings settings) {
         List<String> command = new ArrayList<>();
         command.add(settings.mysqldump().isBlank() ? findMysqldumpCommand() : settings.mysqldump());
         // MySQL requires defaults-file as the first option. The secret never enters argv.
