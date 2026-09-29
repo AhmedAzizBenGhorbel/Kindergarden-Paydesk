@@ -14,7 +14,7 @@ import almohtadinepaydesk.models.UserRole;
 
 public class UserDao {
 
-    public User findByUsername(String username) {
+    public User findByUsername(String username) throws SQLException {
         String sql = "SELECT * FROM users WHERE username = ?";
 
         try (Connection connection = DatabaseConnection.getConnection();
@@ -27,8 +27,6 @@ public class UserDao {
                     return mapUser(resultSet);
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
 
         return null;

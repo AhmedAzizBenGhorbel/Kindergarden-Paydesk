@@ -38,6 +38,6 @@ public class PaymentCalculationService {
     }
 
     public boolean isPositive(BigDecimal amount) {
-        return amount != null && amount.compareTo(BigDecimal.ZERO) > 0;
+        return amount != null && cleanAmount(amount).compareTo(BigDecimal.ZERO) > 0;
     }
 }

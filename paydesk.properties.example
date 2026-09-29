@@ -1,0 +1,11 @@
+# Copy to paydesk.properties in the directory where Maven/app starts.
+# UTF-8 Java properties. Environment PAYDESK_DB_<KEY> overrides db.<key>.
+# Defaults below retain the academic localhost setup; use a dedicated DB user.
+db.host=localhost
+db.port=3306
+db.database=almohtadine_paydesk_db
+db.user=root
+db.password=
+# Optional absolute mysqldump path (forward slashes recommended on Windows).
+# Environment override: PAYDESK_DB_MYSQLDUMP
+db.mysqldump=
