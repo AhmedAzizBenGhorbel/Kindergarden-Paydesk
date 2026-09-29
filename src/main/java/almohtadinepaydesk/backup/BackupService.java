@@ -1,9 +1,7 @@
 package almohtadinepaydesk.backup;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -15,70 +13,128 @@ import almohtadinepaydesk.database.DatabaseConfig;
 
 public class BackupService {
 
-    private static final DateTimeFormatter FILE_DATE_FORMATTER =
-            DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm");
+    private DatabaseConfig.Settings settings;
+    private final long timeoutSeconds;
+    public BackupService() { this(null, 120); }
+    public BackupService(DatabaseConfig.Settings settings, long timeoutSeconds) {
+        if (timeoutSeconds < 1) throw new IllegalArgumentException("Timeout must be positive.");
+        this.settings = settings;
+        this.timeoutSeconds = timeoutSeconds;
+    }
 
     public BackupResult runBackup(String backupFolderPath) {
-        if (backupFolderPath == null || backupFolderPath.trim().isEmpty()) {
+        if (backupFolderPath == null || backupFolderPath.isBlank()) {
             return BackupResult.failure("", "", "Veuillez choisir un dossier de sauvegarde.");
         }
-
-        File backupFolder = new File(backupFolderPath.trim());
-        if (!backupFolder.exists() || !backupFolder.isDirectory()) {
+        java.nio.file.Path folder;
+        try { folder = java.nio.file.Path.of(backupFolderPath.trim()); }
+        catch (java.nio.file.InvalidPathException e) {
+            return BackupResult.failure("", "", "Le chemin du dossier de sauvegarde est invalide.");
+        }
+        if (!java.nio.file.Files.isDirectory(folder)) {
             return BackupResult.failure("", backupFolderPath, "Le dossier de sauvegarde est introuvable.");
         }
-
-        String fileName = AppConfig.DEFAULT_BACKUP_FILE_PREFIX
-                + "_"
-                + LocalDateTime.now().format(FILE_DATE_FORMATTER)
-                + ".sql";
-
-        File outputFile = new File(backupFolder, fileName);
-        List<String> command = buildCommand(outputFile);
-
+        java.nio.file.Path output = null;
+        java.nio.file.Path options = null;
+        java.nio.file.Path errors = null;
+        Process process = null;
+        boolean success = false;
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder(command);
-            processBuilder.redirectErrorStream(true);
-
-            Process process = processBuilder.start();
-            String output = readProcessOutput(process);
-            int exitCode = process.waitFor();
-
-            if (exitCode == 0) {
-                return BackupResult.success(fileName, backupFolder.getAbsolutePath(), "Sauvegarde termin\u00e9e avec succ\u00e8s.");
+            if (settings == null) settings = DatabaseConfig.getSettings();
+            output = java.nio.file.Files.createTempFile(folder, AppConfig.DEFAULT_BACKUP_FILE_PREFIX + "_"
+                    + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss")) + "_", ".sql");
+            options = java.nio.file.Files.createTempFile("paydesk-mysql-", ".cnf");
+            restrictToOwner(options);
+            String clientOptions = "[client]\nuser=" + quoteOption(settings.user())
+                    + "\npassword=" + quoteOption(settings.password()) + "\n";
+            java.nio.file.Files.writeString(options, clientOptions, StandardCharsets.UTF_8);
+            errors = java.nio.file.Files.createTempFile("paydesk-dump-", ".log");
+            List<String> command = buildCommand(output.toFile(), options);
+            ProcessBuilder builder = new ProcessBuilder(command);
+            builder.redirectOutput(ProcessBuilder.Redirect.DISCARD);
+            builder.redirectError(errors.toFile());
+            process = startProcess(builder);
+            if (!process.waitFor(timeoutSeconds, java.util.concurrent.TimeUnit.SECONDS)) {
+                return BackupResult.failure(output.getFileName().toString(), folder.toAbsolutePath().toString(),
+                        "La sauvegarde a dépassé le délai de " + timeoutSeconds + " secondes.");
             }
-
-            return BackupResult.failure(fileName, backupFolder.getAbsolutePath(), cleanMessage(output));
-        } catch (IOException e) {
-            if (isMysqldumpMissing(e)) {
-                return BackupResult.failure(
-                        fileName,
-                        backupFolder.getAbsolutePath(),
-                        "mysqldump introuvable. V\u00e9rifiez l'installation de MySQL ou le PATH.");
+            if (process.exitValue() != 0) {
+                String detail;
+                try (java.io.InputStream stream = java.nio.file.Files.newInputStream(errors)) {
+                    detail = new String(stream.readNBytes(4096), StandardCharsets.UTF_8);
+                }
+                if (!settings.password().isEmpty()) detail = detail.replace(settings.password(), "[redacted]");
+                return BackupResult.failure(output.getFileName().toString(), folder.toAbsolutePath().toString(),
+                        "mysqldump a échoué (code " + process.exitValue() + "). " + cleanMessage(detail));
             }
-
-            return BackupResult.failure(fileName, backupFolder.getAbsolutePath(), e.getMessage());
+            if (java.nio.file.Files.size(output) == 0) {
+                return BackupResult.failure(output.getFileName().toString(), folder.toAbsolutePath().toString(),
+                        "mysqldump n'a produit aucun fichier SQL utilisable.");
+            }
+            success = true;
+            return BackupResult.success(output.getFileName().toString(), folder.toAbsolutePath().toString(),
+                    "Sauvegarde terminée avec succès.");
+        } catch (java.sql.SQLException e) {
+            return BackupResult.failure("", folder.toAbsolutePath().toString(),
+                    almohtadinepaydesk.database.DatabaseDiagnostics.userMessage(e));
+        } catch (IOException | java.nio.file.InvalidPathException e) {
+            return BackupResult.failure("", folder.toAbsolutePath().toString(),
+                    "Impossible de créer la sauvegarde. Vérifiez mysqldump, le PATH et les droits du dossier.");
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            return BackupResult.failure(fileName, backupFolder.getAbsolutePath(), "Sauvegarde interrompue.");
+            return BackupResult.failure("", folder.toAbsolutePath().toString(), "Sauvegarde interrompue.");
+        } finally {
+            if (process != null && process.isAlive()) {
+                process.destroyForcibly();
+                try { process.waitFor(2, java.util.concurrent.TimeUnit.SECONDS); }
+                catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+            }
+            deleteTemporary(options);
+            deleteTemporary(errors);
+            if (!success) deleteTemporary(output);
         }
     }
 
-    private List<String> buildCommand(File outputFile) {
+    protected Process startProcess(ProcessBuilder builder) throws IOException { return builder.start(); }
+
+    private List<String> buildCommand(File outputFile, java.nio.file.Path options) {
         List<String> command = new ArrayList<>();
-        command.add(findMysqldumpCommand());
-        command.add("--host=localhost");
-        command.add("--port=3306");
-        command.add("--user=" + DatabaseConfig.USER);
-
-        if (DatabaseConfig.PASSWORD != null && !DatabaseConfig.PASSWORD.isBlank()) {
-            command.add("--password=" + DatabaseConfig.PASSWORD);
-        }
-
+        command.add(settings.mysqldump().isBlank() ? findMysqldumpCommand() : settings.mysqldump());
+        // MySQL requires defaults-file as the first option. The secret never enters argv.
+        command.add("--defaults-file=" + options.toAbsolutePath());
+        command.add("--host=" + settings.host());
+        command.add("--port=" + settings.port());
+        command.add("--protocol=TCP");
+        command.add("--single-transaction");
         command.add("--default-character-set=utf8mb4");
         command.add("--result-file=" + outputFile.getAbsolutePath());
-        command.add(AppConfig.DATABASE_NAME);
+        command.add(settings.database());
         return command;
+    }
+
+    private static String quoteOption(String value) {
+        return "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"")
+                .replace("\n", "\\n").replace("\r", "\\r") + "\"";
+    }
+    private static void restrictToOwner(java.nio.file.Path file) throws IOException {
+        var acl = java.nio.file.Files.getFileAttributeView(file, java.nio.file.attribute.AclFileAttributeView.class);
+        if (acl != null) {
+            var entry = java.nio.file.attribute.AclEntry.newBuilder()
+                    .setType(java.nio.file.attribute.AclEntryType.ALLOW).setPrincipal(acl.getOwner())
+                    .setPermissions(java.util.EnumSet.allOf(java.nio.file.attribute.AclEntryPermission.class)).build();
+            acl.setAcl(List.of(entry));
+        } else {
+            java.nio.file.Files.setPosixFilePermissions(file,
+                    java.nio.file.attribute.PosixFilePermissions.fromString("rw-------"));
+        }
+    }
+    private static void deleteTemporary(java.nio.file.Path file) {
+        if (file == null) return;
+        try { java.nio.file.Files.deleteIfExists(file); }
+        catch (IOException e) {
+            java.util.logging.Logger.getLogger(BackupService.class.getName())
+                    .warning("Backup temporary file cleanup failed; check local temporary directory permissions.");
+        }
     }
 
     private String findMysqldumpCommand() {
@@ -132,43 +188,12 @@ public class BackupService {
         return null;
     }
 
-    private String readProcessOutput(Process process) throws IOException {
-        StringBuilder output = new StringBuilder();
-
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (!line.isBlank()) {
-                    output.append(line).append(System.lineSeparator());
-                }
-            }
-        }
-
-        return output.toString().trim();
-    }
-
     private String cleanMessage(String output) {
         if (output == null || output.isBlank()) {
             return "La sauvegarde a \u00e9chou\u00e9.";
         }
 
         return output;
-    }
-
-    private boolean isMysqldumpMissing(IOException e) {
-        String message = e.getMessage();
-
-        if (message == null) {
-            return false;
-        }
-
-        String lowerMessage = message.toLowerCase();
-        return lowerMessage.contains("mysqldump")
-                && (lowerMessage.contains("createprocess error=2")
-                        || lowerMessage.contains("cannot find")
-                        || lowerMessage.contains("le fichier sp\u00e9cifi\u00e9 est introuvable"));
     }
 
     public static class BackupResult {
