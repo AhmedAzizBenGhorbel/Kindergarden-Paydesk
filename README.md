@@ -75,6 +75,10 @@ Maven downloads declared dependencies as needed. The JavaFX application opens th
 
 Choose a writable destination folder in the application settings, then use the backup screen. Ensure `mysqldump` is installed and available to the app. Backup history records attempts and their reported status. A successful backup command does not prove that the dump can be restored; recovery must be checked separately in a disposable database. See the [isolated restore exercise](docs/restore-exercise.md) and [troubleshooting guide](docs/troubleshooting.md).
 
+## Verification
+
+Run `mvn clean test` for the isolated suite. [Verification and reproducible labs](docs/verification.md) records 16 passing tests on Ubuntu/JDK 25, including payment rollback, safe login failures, and backup failure/configuration handling. These checks use synthetic fixtures; JavaFX interaction, a real MySQL setup, and database recovery remain unverified.
+
 ## Repository map
 
 - `src/main/java/almohtadinepaydesk/controllers` — JavaFX screen controllers
