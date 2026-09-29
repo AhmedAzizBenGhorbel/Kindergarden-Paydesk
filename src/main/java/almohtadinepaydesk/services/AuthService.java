@@ -1,5 +1,7 @@
 package almohtadinepaydesk.services;
 
+import java.sql.SQLException;
+import almohtadinepaydesk.database.DatabaseDiagnostics;
 import almohtadinepaydesk.dao.ActivityLogDao;
 import almohtadinepaydesk.dao.UserDao;
 import almohtadinepaydesk.models.User;
@@ -8,12 +10,25 @@ import almohtadinepaydesk.security.Session;
 
 public class AuthService {
 
-    private final UserDao userDao = new UserDao();
-    private final ActivityLogDao activityLogDao = new ActivityLogDao();
+    private final UserDao userDao;
+    private final ActivityLogDao activityLogDao;
+    public AuthService() { this(new UserDao(), new ActivityLogDao()); }
+    public AuthService(UserDao userDao, ActivityLogDao activityLogDao) {
+        this.userDao = userDao;
+        this.activityLogDao = activityLogDao;
+    }
     private String lastErrorMessage = "";
 
     public boolean login(String username, String password) {
-        User user = userDao.findByUsername(username);
+        lastErrorMessage = "";
+        User user;
+        try {
+            user = userDao.findByUsername(username);
+        } catch (SQLException e) {
+            lastErrorMessage = DatabaseDiagnostics.userMessage(e);
+            DatabaseDiagnostics.report("login user lookup", e);
+            return false;
+        }
 
         if (user == null) {
             lastErrorMessage = "Nom d'utilisateur ou mot de passe incorrect.";
