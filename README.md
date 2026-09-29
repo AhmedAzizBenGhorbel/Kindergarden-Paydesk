@@ -1,97 +1,91 @@
 # Kindergarden Paydesk
 
-Kindergarden Paydesk is a desktop JavaFX application for tracking kindergarten payments at Garderie Almohtadine. It focuses on monthly payment records, partial payments, extras, receipts data, local backups, and activity logs. The app is built as a university integration project and is intentionally kept simple and beginner-friendly.
+Kindergarden Paydesk is a JavaFX desktop application for recording kindergarten fees, payments, receipts, and related activity for Garderie Almohtadine. It was developed as a university integration project and remains a learning-scale desktop application. The codebase is useful for exploring JavaFX/FXML screens, JDBC data access, payment calculations, and local MySQL backup workflows.
 
-## Key Features
+## What it does
 
-- Login, logout, and change password
-- Role handling for `Administrateur` and `Personnel`
-- Dashboard with summary totals and recent payments
-- Children management
-- School years and active months
-- Monthly payment record generation
-- Extras and recurring fees
-- Payment entries with receipt data storage
-- Search and filters
-- Local backup using `mysqldump`
-- Settings screen
-- Activity logs
+- Manages children, school years, monthly fee records, and extra charges.
+- Records full and partial payments with receipt data.
+- Shows payment totals, remaining balances, advances, and payment status.
+- Provides `ADMIN` (Administrateur) and `PERSONNEL` roles; account management and activity-log screens are restricted to administrators in the application UI.
+- Creates local SQL backups through the MySQL `mysqldump` utility.
+- Records application activity separately from backup attempts.
 
-## Tech Stack
+This is a local desktop app, not a web service. Its role checks and in-memory session are application controls; they do not provide enterprise-grade security or server-side authorization.
 
-- Java 25
-- JavaFX
-- FXML
-- CSS
-- Maven
-- JDBC
-- MySQL
-- `mysql-connector-j` 9.5.0
+## Architecture
 
-## Prerequisites
+```mermaid
+flowchart LR
+  Operator --> UI[JavaFX + FXML screens]
+  UI --> Services[Authentication + payment calculations]
+  UI --> DAO[JDBC data access]
+  Services --> DAO
+  DAO --> DB[(MySQL)]
+  UI -->|mysqldump| SQL[Local SQL backup]
+```
+
+The payment screen writes the payment entry and receipt in one JDBC transaction. See [payment transaction](src/main/java/almohtadinepaydesk/services/PaymentTransactionService.java), [payment calculations](src/main/java/almohtadinepaydesk/services/PaymentCalculationService.java), [authentication](src/main/java/almohtadinepaydesk/services/AuthService.java), [user lookup](src/main/java/almohtadinepaydesk/dao/UserDao.java), and [backup implementation](src/main/java/almohtadinepaydesk/backup/BackupService.java). More detail is in [Architecture and data flow](docs/architecture.md).
+
+## Requirements
 
 - JDK 25
-- Maven 3.9+ recommended
-- MySQL Server running locally on `localhost:3306`
-- phpMyAdmin optional, for inspecting the database
-- `mysqldump` available through MySQL, XAMPP, or the system `PATH` if you want to use the backup feature
+- Maven 3.9 or later
+- A local MySQL server
+- MySQL command-line client tools, including `mysqldump`, for backups
 
-## Database Setup
+The Maven build declares JavaFX 25.0.2 and MySQL Connector/J 9.5.0. A graphical desktop session is needed to open the JavaFX UI. Use synthetic records for evaluation and screenshots; this repository does not include a verified screenshot.
 
-The application uses this database name:
+## Local configuration
 
-```text
-almohtadine_paydesk_db
+Copy [`paydesk.properties.example`](paydesk.properties.example) to `paydesk.properties` in the directory from which Maven/application is started. Edit the local copy for your MySQL instance. The local file is ignored by Git; do not commit database credentials. Environment variables named `PAYDESK_DB_HOST`, `PAYDESK_DB_PORT`, `PAYDESK_DB_DATABASE`, `PAYDESK_DB_USER`, `PAYDESK_DB_PASSWORD`, and `PAYDESK_DB_MYSQLDUMP` override the corresponding `db.*` property. If neither source sets a value, development defaults are `localhost:3306`, database `almohtadine_paydesk_db`, user `root`, and an empty password. Prefer a dedicated local MySQL account with only the permissions needed for the app.
+
+Example for PowerShell, run from the repository directory:
+
+```powershell
+Copy-Item paydesk.properties.example paydesk.properties
+notepad paydesk.properties
 ```
 
-Create it with:
+The optional `db.mysqldump` setting is the absolute path to the executable when it is not available through PATH. Keep passwords out of shell command lines and screenshots.
 
-```sql
-CREATE DATABASE IF NOT EXISTS almohtadine_paydesk_db
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
+## Database setup
+
+Create the database and tables before first login. The schema and seed SQL are in `src/main/resources/database/`. After local configuration, run the explicit initializer from the project root:
+
+```powershell
+mvn compile exec:java "-Dexec.mainClass=almohtadinepaydesk.database.SchemaInitializer"
 ```
 
-Then initialize the schema by importing these files in order:
+The initializer connects using the configured account, creates/updates the configured schema, and loads the seed data. It is an explicit setup step; normal desktop launch does not initialize the database automatically. The account therefore needs permission to create the database and tables for the first initialization. Run it only for a fresh disposable/local setup: every run executes `seed.sql`, whose duplicate-key clauses reactivate and restore the seeded admin role, reset the seeded school year and months to active/default values, and overwrite the `garderie_name`, `payment_deadline_day`, and `backup_folder` settings with seed defaults. The seeded admin password hash and salt are preserved on duplicate username, but its role and active flag are reset. Routine reruns can therefore overwrite settings and application state. Back up valuable data first and do not use this initializer as a general repair command.
 
-1. `src/main/resources/database/schema.sql`
-2. `src/main/resources/database/seed.sql`
+The seed SQL creates the initial account `admin` with temporary password `admin123`. After the first successful login, change this password in the application. The code migrates legacy plaintext password storage to salted PBKDF2 on successful login; schema setup may also upgrade the seeded account. Do not expose the initial credentials on a deployed or shared system.
 
-If you are using XAMPP on Windows, you can also run:
+## Build and run
 
-```bash
-C:\xampp\mysql\bin\mysql.exe -u root < src/main/resources/database/schema.sql
-C:\xampp\mysql\bin\mysql.exe -u root almohtadine_paydesk_db < src/main/resources/database/seed.sql
-```
+From the repository root, after configuring MySQL and running the one-time initializer above:
 
-The seed file creates the default admin account. On first successful login, the app upgrades the temporary seeded password storage to PBKDF2 hashing automatically.
-
-Default login:
-
-- Username: `admin`
-- Password: `admin123`
-
-## How to Run
-
-From the project root:
-
-```bash
+```powershell
 mvn clean javafx:run
 ```
 
-## Project Structure
+Maven downloads declared dependencies as needed. The JavaFX application opens the login screen. Follow the account and password guidance above on a fresh local database.
 
-- `src/main/java/almohtadinepaydesk` contains the Java source code
-- `src/main/java/almohtadinepaydesk/controllers` contains JavaFX controllers
-- `src/main/java/almohtadinepaydesk/dao` contains database access classes
-- `src/main/java/almohtadinepaydesk/models` contains domain models and enums
-- `src/main/java/almohtadinepaydesk/services` contains business logic
-- `src/main/java/almohtadinepaydesk/utils` contains shared helpers
-- `src/main/java/almohtadinepaydesk/security` contains session and password utilities
-- `src/main/resources/fxml` contains the JavaFX layouts
-- `src/main/resources/css` contains the application stylesheet
-- `src/main/resources/database` contains the SQL schema and seed files
+## Backup and recovery
 
-## University Project Note
+Choose a writable destination folder in the application settings, then use the backup screen. Ensure `mysqldump` is installed and available to the app. Backup history records attempts and their reported status. A successful backup command does not prove that the dump can be restored; recovery must be checked separately in a disposable database. See the [isolated restore exercise](docs/restore-exercise.md) and [troubleshooting guide](docs/troubleshooting.md).
 
-This application is a university integration project. It is designed for learning and demonstration purposes, with a desktop-only workflow and a simplified architecture suitable for student-level maintenance.
+## Repository map
+
+- `src/main/java/almohtadinepaydesk/controllers` — JavaFX screen controllers
+- `src/main/java/almohtadinepaydesk/dao` — JDBC queries and persistence
+- `src/main/java/almohtadinepaydesk/services` — authentication and payment logic
+- `src/main/java/almohtadinepaydesk/models` — application data models and enums
+- `src/main/java/almohtadinepaydesk/database` — connection settings and schema initialization
+- `src/main/java/almohtadinepaydesk/backup` — local SQL dump workflow
+- `src/main/resources/fxml` and `css` — screen layouts and styling
+- `src/main/resources/database` — schema and initial seed records
+
+## Academic context and attribution
+
+This project retains its academic identity and original French interface. Labels, messages, and domain terms remain in French where used by the application. Refer to the repository's existing attribution and asset notices; no license is inferred by this documentation.

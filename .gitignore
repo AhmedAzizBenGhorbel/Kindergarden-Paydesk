@@ -2,3 +2,8 @@
 .project
 .settings/
 target/
+
+# Local credentials and generated database dumps
+paydesk.properties
+*.sql.backup
+backups/
